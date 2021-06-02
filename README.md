@@ -1,7 +1,5 @@
-- 👋 Hi, I’m @linyongping
+- 👋 Hi, I’m @linyongping.
 - 👀 I’m a front-end developer.
-- 🌱 I’m currently learning server side programing
-- 💞️ 
 - 📫 linyongping@gmail.com
 
 <!---
