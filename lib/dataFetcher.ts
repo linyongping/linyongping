@@ -1,4 +1,4 @@
-type DataUsageDetails = {
+export type DataUsageDetails = {
   monthly_bw_limit_b: number;
   bw_counter_b: number;
   bw_reset_day_of_month: number;
@@ -10,8 +10,4 @@ const dateUsageUrl =
 export async function getDataUsageDetails(): Promise<DataUsageDetails> {
   const res = await fetch(dateUsageUrl);
   return res.json();
-}
-
-export async function getHello(): Promise<string> {
-  return await fetch("/hello").then((res) => res.text());
 }

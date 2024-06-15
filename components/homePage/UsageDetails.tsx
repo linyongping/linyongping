@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { ProgressBar } from "./ProgressBar";
 import { useQuery } from "@tanstack/react-query";
+import { DataUsageDetails } from "@/lib/dataFetcher";
 
 const GB = 1000 * 1000 * 1000;
 
@@ -21,13 +22,9 @@ function getDaysLeft(specificDay: number = 0) {
 export const UsageDetails = ({
   initialData,
 }: {
-  initialData: {
-    monthly_bw_limit_b: number;
-    bw_counter_b: number;
-    bw_reset_day_of_month: number;
-  };
+  initialData: DataUsageDetails;
 }) => {
-  const { data, isFetching, refetch } = useQuery({
+  const { data, isFetching, refetch } = useQuery<DataUsageDetails>({
     queryKey: ["data"],
     queryFn: () => {
       return fetch("/api/proxyDataUsage").then((res) => res.json());
@@ -36,13 +33,13 @@ export const UsageDetails = ({
 
   const { monthly_bw_limit_b, bw_counter_b, bw_reset_day_of_month } =
     initialData;
-  const totalData = monthly_bw_limit_b / GB;
-  const usedData = bw_counter_b / GB;
+  const totalData = (data?.monthly_bw_limit_b ?? monthly_bw_limit_b) / GB;
+  const usedData = (data?.bw_counter_b ?? bw_counter_b) / GB;
   const today = new Date();
   const nextResetDay = new Date(
     today.getFullYear(),
     today.getMonth() + 1,
-    bw_reset_day_of_month
+    data?.bw_reset_day_of_month ?? bw_reset_day_of_month
   );
 
   return (
@@ -51,19 +48,15 @@ export const UsageDetails = ({
       <p>Used: {usedData.toFixed(2)} GB</p>
       <p>Remaining: {(totalData - usedData).toFixed(2)} GB</p>
       <p>Next month reset day: {nextResetDay.toISOString()}</p>
-      <p>
-        Left days to next reset: {getDaysLeft(bw_reset_day_of_month)} days
-      </p>
+      <p>Left days to next reset: {getDaysLeft(bw_reset_day_of_month)} days</p>
       <br />
       <ProgressBar total={totalData} progress={usedData} />
       <button
-        onClick={() =>refetch()}
+        onClick={() => refetch()}
         className="mt-4 px-4 py-2 bg-gray-800 text-white rounded"
       >
         {isFetching ? "Refreshing..." : "Refresh"}
       </button>
-
-      <p>{ data && data}</p>
     </div>
   );
 };
