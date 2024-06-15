@@ -1,72 +1,10 @@
 import React from "react";
 import Image from "next/image";
-
-async function getData(): Promise<{
-  monthly_bw_limit_b: number;
-  bw_counter_b: number;
-  bw_reset_day_of_month: number;
-}> {
-  const res = await fetch(
-    "https://justmysocks6.net/members/getbwcounter.php?service=1005699&id=60886f48-f5d7-4787-87af-5f172b056cfe"
-  );
-  return res.json();
-}
-
-const ProgressBar = ({
-  total = 0,
-  progress = 0,
-}: {
-  total?: number;
-  progress?: number;
-}) => {
-  // Calculate the width percentage of the progress
-  const progressPercentage = (progress / total) * 100;
-
-  const progressBarStyle = {
-    width: `${progressPercentage}%`,
-    height: "100%",
-    background:
-      progressPercentage > 85
-        ? "linear-gradient(90deg, red, darkred)"
-        : "linear-gradient(90deg, #00ffff, #007f7f)",
-    boxShadow:
-      progressPercentage > 85
-        ? "0 0 10px red, 0 0 20px red, 0 0 30px red"
-        : "0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff",
-  };
-
-  return (
-    <div className="w-full bg-black rounded overflow-hidden h-5 border border-gray-600">
-      <div className="h-full bg-cyan-400" style={progressBarStyle}></div>
-    </div>
-  );
-};
-
-const GB = 1000 * 1000 * 1000;
-
-// To calculate how many days are left from the current day to the next month's specific day using JavaScript in a browser environment,
-function getDaysLeft(specificDay: number) {
-  const today = new Date();
-  const nextMonth = new Date(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    specificDay
-  );
-  const timeLeft = nextMonth.getTime() - today.getTime();
-  const daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
-  return daysLeft;
-}
+import { UsageDetails } from "@/components/homePage/UsageDetails";
+import { getDataUsageDetails } from "@/lib/dataFetcher";
 
 export default async function Home() {
-  const data = await getData();
-  const totalData = data.monthly_bw_limit_b / GB;
-  const usedData = data.bw_counter_b / GB;
-  const today = new Date();
-  const nextResetDay = new Date(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    data.bw_reset_day_of_month
-  );
+  const data = await getDataUsageDetails();
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -104,15 +42,7 @@ export default async function Home() {
       </div>
 
       <div className="mb-32 text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left">
-        <p>Total: {totalData} GB</p>
-        <p>Used: {usedData.toFixed(2)} GB</p>
-        <p>Remaining: {(totalData - usedData).toFixed(2)} GB</p>
-        <p>Next month reset day: {nextResetDay.toISOString()}</p>
-        <p>
-          Left days to next reset: {getDaysLeft(data.bw_reset_day_of_month)}{" "}
-          days
-        </p>
-        <ProgressBar total={totalData} progress={usedData} />
+        <UsageDetails initialData={data} />
       </div>
     </main>
   );
