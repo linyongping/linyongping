@@ -1,3 +1,4 @@
+import React from "react";
 import Image from "next/image";
 
 async function getData(): Promise<{
@@ -23,21 +24,20 @@ const ProgressBar = ({
 
   const progressBarStyle = {
     width: `${progressPercentage}%`,
-    height: '100%',
-    background: progressPercentage > 85 
-      ? 'linear-gradient(90deg, red, darkred)'
-      : 'linear-gradient(90deg, #00ffff, #007f7f)',
-    boxShadow: progressPercentage > 85
-      ? '0 0 10px red, 0 0 20px red, 0 0 30px red'
-      : '0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff'
+    height: "100%",
+    background:
+      progressPercentage > 85
+        ? "linear-gradient(90deg, red, darkred)"
+        : "linear-gradient(90deg, #00ffff, #007f7f)",
+    boxShadow:
+      progressPercentage > 85
+        ? "0 0 10px red, 0 0 20px red, 0 0 30px red"
+        : "0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff",
   };
 
   return (
     <div className="w-full bg-black rounded overflow-hidden h-5 border border-gray-600">
-      <div
-        className="h-full bg-cyan-400"
-        style={progressBarStyle}
-      ></div>
+      <div className="h-full bg-cyan-400" style={progressBarStyle}></div>
     </div>
   );
 };
@@ -61,7 +61,12 @@ export default async function Home() {
   const data = await getData();
   const totalData = data.monthly_bw_limit_b / GB;
   const usedData = data.bw_counter_b / GB;
-  const resetDay = data.bw_reset_day_of_month;
+  const today = new Date();
+  const nextResetDay = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    data.bw_reset_day_of_month
+  );
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -102,8 +107,11 @@ export default async function Home() {
         <p>Total: {totalData} GB</p>
         <p>Used: {usedData.toFixed(2)} GB</p>
         <p>Remaining: {(totalData - usedData).toFixed(2)} GB</p>
-        <p>Reset day: {resetDay} th</p>
-        <p>Left days to next reset: {getDaysLeft(resetDay)} days</p>
+        <p>Next month reset day: {nextResetDay.toISOString()}</p>
+        <p>
+          Left days to next reset: {getDaysLeft(data.bw_reset_day_of_month)}{" "}
+          days
+        </p>
         <ProgressBar total={totalData} progress={usedData} />
       </div>
     </main>
