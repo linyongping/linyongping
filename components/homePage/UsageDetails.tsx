@@ -29,6 +29,7 @@ export const UsageDetails = ({
     queryFn: () => {
       return fetch("/api/proxyDataUsage").then((res) => res.json());
     },
+    enabled: false,
   });
 
   const { monthly_bw_limit_b, bw_counter_b, bw_reset_day_of_month } =
@@ -47,8 +48,8 @@ export const UsageDetails = ({
       <p>Total: {totalData} GB</p>
       <p>Used: {usedData.toFixed(2)} GB</p>
       <p>Remaining: {(totalData - usedData).toFixed(2)} GB</p>
-      <p>Next month reset day: {nextResetDay.toISOString()}</p>
-      <p>Left days to next reset: {getDaysLeft(bw_reset_day_of_month)} days</p>
+      <p>Next reset: {nextResetDay.toDateString()}</p>
+      <p>Left days: {getDaysLeft(bw_reset_day_of_month)} days</p>
       <br />
       <ProgressBar total={totalData} progress={usedData} />
       <button
