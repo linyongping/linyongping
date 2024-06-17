@@ -28,8 +28,7 @@ export const UsageDetails = ({
     queryKey: ["data"],
     queryFn: () => {
       return fetch("/api/proxyDataUsage").then((res) => res.json());
-    },
-    enabled: false,
+    }
   });
 
   const { monthly_bw_limit_b, bw_counter_b, bw_reset_day_of_month } =
