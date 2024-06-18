@@ -27,8 +27,11 @@ export const UsageDetails = ({
   const { data, isFetching, refetch } = useQuery<DataUsageDetails>({
     queryKey: ["data"],
     queryFn: () => {
-      return fetch("/api/proxyDataUsage").then((res) => res.json());
-    }
+      return fetch({
+        method: "post",
+        url: "/api/proxyDataUsage",
+      }).then((res) => res.json());
+    },
   });
 
   const { monthly_bw_limit_b, bw_counter_b, bw_reset_day_of_month } =
