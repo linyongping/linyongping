@@ -27,9 +27,8 @@ export const UsageDetails = ({
   const { data, isFetching, refetch } = useQuery<DataUsageDetails>({
     queryKey: ["data"],
     queryFn: () => {
-      return fetch({
-        method: "post",
-        url: "/api/proxyDataUsage",
+      return fetch("/api/proxyDataUsage", {
+        method: "POST",
       }).then((res) => res.json());
     },
   });
