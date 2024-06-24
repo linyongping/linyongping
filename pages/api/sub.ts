@@ -25,3 +25,5 @@
 //     res.status(500).json({ error: "Failed to read file" });
 //   }
 // }
+
+export const runtime = "edge";
