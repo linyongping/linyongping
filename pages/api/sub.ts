@@ -3,6 +3,10 @@ import fse from "fs-extra";
 import yaml from "js-yaml";
 import { NextApiRequest, NextApiResponse } from "next";
 
+export const config = {
+  runtime: "edge",
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -14,7 +18,7 @@ export default async function handler(
     const tempFile = await fse.readFile(filePath, "utf8");
     const json = JSON.stringify(yaml.load(tempFile));
     res.setHeader("Content-Type", "text/plain");
-    res.setHeader('x-timestamp', currentTime);
+    res.setHeader("x-timestamp", currentTime);
     res.status(200).send(json);
   } catch (err) {
     console.log(err);
