@@ -1,3 +1,4 @@
+import { Otp } from "@/components/otp/Otp";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -21,7 +22,7 @@ export default function Sub() {
   };
 
   if (hide) {
-    return <Button onClick={() => setHide(false)}>Show config</Button>;
+    return <Otp />;
   }
 
   return (

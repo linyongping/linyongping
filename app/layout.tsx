@@ -4,6 +4,7 @@ import { Inter as FontSans } from "next/font/google";
 import ReactQueryProvider from "./react-query-provider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${cn(inter.className, fontSans.variable)}`}>
         <ReactQueryProvider>{children}</ReactQueryProvider>
+        <Toaster />
       </body>
     </html>
   );
