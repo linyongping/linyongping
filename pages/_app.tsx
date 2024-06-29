@@ -3,6 +3,8 @@ import ReactQueryProvider from "@/app/react-query-provider";
 import { cn } from "@/lib/utils";
 import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 type LayoutProps = {
   Component: React.ComponentType;
@@ -22,10 +24,18 @@ export default function Layout({ Component, pageProps }: LayoutProps) {
         fontSans.variable
       )}`}
     >
-      <ReactQueryProvider>
-        <Component {...pageProps} />
-        <Toaster />
-      </ReactQueryProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <ReactQueryProvider>
+          <ThemeSwitcher />
+          <Component {...pageProps} />
+          <Toaster />
+        </ReactQueryProvider>
+      </ThemeProvider>
     </div>
   );
 }
