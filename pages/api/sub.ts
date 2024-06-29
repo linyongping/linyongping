@@ -1,29 +1,24 @@
-// import path from "path";
-// import fse from "fs-extra";
-// import yaml from "js-yaml";
-// import { NextApiRequest, NextApiResponse } from "next";
-
-// export const config = {
-//   runtime: "edge",
-// };
-
-// export default async function handler(
-//   req: NextApiRequest,
-//   res: NextApiResponse
-// ) {
-//   const currentTime = new Date().toISOString();
-//   const filePath = path.join(process.cwd(), "public", "clashTemp.yaml");
-
-//   try {
-//     const tempFile = await fse.readFile(filePath, "utf8");
-//     const json = JSON.stringify(yaml.load(tempFile));
-//     res.setHeader("Content-Type", "text/plain");
-//     res.setHeader("x-timestamp", currentTime);
-//     res.status(200).send(json);
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({ error: "Failed to read file" });
-//   }
-// }
+import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
+
+export default async function handler(req: NextRequest) {
+  try {
+    const yamlConfig = await fetch(
+      "https://sean-blog.pages.dev/clashTemp.yaml"
+    );
+    if (!yamlConfig.ok) {
+      throw new Error(`Error fetching data: ${yamlConfig.statusText}`);
+    }
+    const data = await yamlConfig.text();
+    return new NextResponse(data, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return new NextResponse("Error fetching data", { status: 500 });
+  }
+}
