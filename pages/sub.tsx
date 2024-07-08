@@ -1,16 +1,16 @@
+"use client";
+
+import React, { useState } from "react";
 import { Otp } from "@/components/otp/Otp";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
-import { useState } from "react";
 
-export default function Sub(props) {
+export default function Sub() {
   const [hide, setHide] = useState(true);
   const { toast } = useToast();
-
-  console.log("searchParams", props);
 
   const { data, isFetching } = useQuery({
     queryKey: ["config"],
