@@ -7,6 +7,7 @@ export default async function handler(req: NextRequest) {
     const yamlConfig = await fetch(
       "https://sean-blog.pages.dev/clashTemp.yaml"
     );
+
     if (!yamlConfig.ok) {
       throw new Error(`Error fetching data: ${yamlConfig.statusText}`);
     }
