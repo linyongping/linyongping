@@ -79,6 +79,9 @@ devDependencies:
   '@tanstack/eslint-plugin-query':
     specifier: ^5.43.1
     version: 5.43.1(eslint@8.57.0)(typescript@5.5.2)
+  '@types/base-64':
+    specifier: 1.0.2
+    version: 1.0.2
   '@types/fs-extra':
     specifier: 11.0.4
     version: 11.0.4
@@ -1498,6 +1501,10 @@ packages:
 
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+    dev: true
+
+  /@types/base-64@1.0.2:
+    resolution: {integrity: sha512-uPgKMmM9fmn7I+Zi6YBqctOye4SlJsHKcisjHIMWpb2YKZRc36GpKyNuQ03JcT+oNXg1m7Uv4wU94EVltn8/cw==}
     dev: true
 
   /@types/estree-jsx@1.0.5:
