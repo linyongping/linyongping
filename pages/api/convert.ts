@@ -1,4 +1,4 @@
-import { convertSubStringToJson } from "@/lib/utils";
+import { convertSubStringToJson, SsConfig, VmessConfig } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import yaml from "js-yaml";
 
@@ -13,11 +13,11 @@ type ClashConfig = {
   "external-controller": string;
   proxies: {
     name: string;
-    server: string;
+    server?: string;
     port: number;
     type: "ss" | "vmess";
-    cipher: string;
-    password: string;
+    cipher?: string;
+    password?: string;
     uuid?: string;
     alterId?: number;
     tls?: boolean;
@@ -41,10 +41,10 @@ export default async function handler(req: NextRequest) {
   }
 
   try {
-    const vmessSubString = await fetch(
+    const justVmessRes = await fetch(
       "https://jmssub.net/members/getsub.php?service=1005699&id=60886f48-f5d7-4787-87af-5f172b056cfe"
     );
-    const vmessSub = await vmessSubString.text();
+    const vmessSub = await justVmessRes.text();
     const subJson = convertSubStringToJson(vmessSub);
 
     const yamlConfigRes = await fetch(
@@ -54,25 +54,49 @@ export default async function handler(req: NextRequest) {
     const yamlConfigText = await yamlConfigRes.text();
     let yamlJson = yaml.load(yamlConfigText) as ClashConfig;
 
-    yamlJson.proxies = yamlJson.proxies
-      .map((proxy) => {
-        if (proxy.type === "vmess") {
-          const matchedConfig = subJson.find((config) => {
-            return config.ps === proxy.name;
-          }); // find matched config
+    yamlJson.proxies = yamlJson.proxies.map((proxy) => {
+      if (proxy.type === "vmess") {
+        const matchedConfig = subJson.find((config) => {
+          return (config as VmessConfig).ps === proxy.name;
+        }); // find matched config
 
-          if (matchedConfig) {
-            return {
-              ...proxy,
-              uuid: matchedConfig.id,
-              server: matchedConfig.add,
-              port: parseInt(matchedConfig.port),
-            };
-          }
+        if (matchedConfig && matchedConfig.serverType === "vmess") {
+          // remove serverType from matchedConfig
+          return {
+            name: proxy.name,
+            server: matchedConfig.add,
+            port: parseInt(matchedConfig.port),
+            type: "vmess",
+            uuid: matchedConfig.id,
+            alterId: parseInt(matchedConfig.aid),
+            cipher: "auto",
+            tls: false,
+            "skip-cert-verify": true,
+            udp: true,
+          };
         }
-        return proxy;
-      })
-      .filter((proxy) => proxy.type === "vmess");
+      }
+
+      if (proxy.type === "ss") {
+        const matchedConfig = subJson.find((config) => {
+          return (config as SsConfig).name === proxy.name;
+        });
+
+        if (matchedConfig && matchedConfig.serverType === "ss") {
+          console.log("matchedConfig", matchedConfig);
+          return {
+            name: proxy.name,
+            server: matchedConfig.server,
+            port: parseInt(matchedConfig.port ?? ""),
+            type: "ss",
+            cipher: matchedConfig.cipher,
+            password: matchedConfig.password,
+            udp: true,
+          };
+        }
+      }
+      return proxy;
+    });
 
     const newYamlContent = yaml.dump(yamlJson);
 
