@@ -34,6 +34,13 @@ proxy-groups:
       - JMS-1005699@c11s4.portablesubmarines.com:9358
       - JMS-1005699@c11s5.portablesubmarines.com:9358
       - JMS-1005699@c11s801.portablesubmarines.com:9358
+  - name: US-PROXY-ONLY
+    type: select
+    proxies:
+      - JMS-1005699@c11s1.portablesubmarines.com:9358
+      - JMS-1005699@c11s2.portablesubmarines.com:9358
+      - JMS-1005699@c11s3.portablesubmarines.com:9358
+      - JMS-1005699@c11s801.portablesubmarines.com:9358
   - name: 🎥 NETFLIX
     type: select
     proxies:
@@ -131,6 +138,7 @@ proxy-groups:
       - JMS-1005699@c11s5.portablesubmarines.com:9358
       - JMS-1005699@c11s801.portablesubmarines.com:9358
 rules:
+  - DOMAIN-KEYWORD,claude,US-PROXY-ONLY
   - DOMAIN-SUFFIX,local,🎯 全球直连
   - IP-CIDR,192.168.0.0/16,🎯 全球直连,no-resolve
   - IP-CIDR,10.0.0.0/8,🎯 全球直连,no-resolve
