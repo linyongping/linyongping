@@ -35,7 +35,9 @@ proxy-groups:
       - JMS-1005699@c11s5.portablesubmarines.com:9358
       - JMS-1005699@c11s801.portablesubmarines.com:9358
   - name: US-PROXY-ONLY
-    type: select
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 300
     proxies:
       - JMS-1005699@c11s1.portablesubmarines.com:9358
       - JMS-1005699@c11s2.portablesubmarines.com:9358
