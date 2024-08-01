@@ -11,9 +11,12 @@ function getDaysLeft(specificDay: number = 0) {
   const today = new Date();
   const nextMonth = new Date(
     today.getFullYear(),
-    today.getMonth() + 1,
+    today.getMonth(),
     specificDay
   );
+  if (today.getDate() >= specificDay) {
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+  }
   const timeLeft = nextMonth.getTime() - today.getTime();
   const daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
   return daysLeft;
