@@ -35,6 +35,7 @@ export function convertSubStringToJson(
   try {
     const decodedData = decode(vmessSubString);
     const encodedConfigs = decodedData.split("\n");
+    console.log("endcoded:", encodedConfigs);
 
     const configs: (VmessConfig | SsConfig)[] = encodedConfigs.map(
       (encoded: string) => {
