@@ -32,18 +32,24 @@ type ClashConfig = {
   rules: string[];
 };
 
+const seanSubUrl =
+  "https://jmssub.net/members/getsub.php?service=1005699&id=60886f48-f5d7-4787-87af-5f172b056cfe";
+const cabbageSubUrl =
+  "https://jmssub.net/members/getsub.php?service=1034881&id=be6eee5e-4512-4a89-8563-cae37a3be8a8";
+
 export default async function handler(req: NextRequest) {
   const url = new URL(req.url);
   const { searchParams } = url;
   const secret = searchParams.get("secret");
+  const subType = searchParams.get("subType");
   if (secret !== "kfcv50") {
     return new NextResponse("Invalid secret", { status: 401 });
   }
 
+  const subUrl = subType === "xbc" ? cabbageSubUrl : seanSubUrl;
+
   try {
-    const justVmessRes = await fetch(
-      "https://jmssub.net/members/getsub.php?service=1005699&id=60886f48-f5d7-4787-87af-5f172b056cfe"
-    );
+    const justVmessRes = await fetch(subUrl);
     const vmessSub = await justVmessRes.text();
     const subJson = convertSubStringToJson(vmessSub);
 
@@ -99,8 +105,13 @@ export default async function handler(req: NextRequest) {
     });
 
     const newYamlContent = yaml.dump(yamlJson);
+    // add comment to yaml
+    const comment = `# Updated at ${new Date().toLocaleString()} with ${
+      subType ? "xbc" : "sean"
+    } sub`;
+    const newYamlContentWithComment = `${comment}\n${newYamlContent}`;
 
-    return new NextResponse(newYamlContent, {
+    return new NextResponse(newYamlContentWithComment, {
       status: 200,
       headers: {
         "Content-Type": "text/plain",
