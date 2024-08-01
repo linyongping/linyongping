@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { ProgressBar } from "./ProgressBar";
 import { useQuery } from "@tanstack/react-query";
 import { DataUsageDetails } from "@/lib/dataFetcher";
@@ -9,15 +9,15 @@ const GB = 1000 * 1000 * 1000;
 
 function getDaysLeft(specificDay: number = 0) {
   const today = new Date();
-  const nextMonth = new Date(
+  const nextResetDay = new Date(
     today.getFullYear(),
     today.getMonth(),
     specificDay
   );
   if (today.getDate() >= specificDay) {
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    nextResetDay.setMonth(nextResetDay.getMonth() + 1);
   }
-  const timeLeft = nextMonth.getTime() - today.getTime();
+  const timeLeft = nextResetDay.getTime() - today.getTime();
   const daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
   return daysLeft;
 }
@@ -41,11 +41,15 @@ export const UsageDetails = ({
   const totalData = (data?.monthly_bw_limit_b ?? monthly_bw_limit_b) / GB;
   const usedData = (data?.bw_counter_b ?? bw_counter_b) / GB;
   const today = new Date();
-  const nextResetDay = new Date(
+  let nextResetDay = new Date(
     today.getFullYear(),
-    today.getMonth() + 1,
+    today.getMonth(),
     data?.bw_reset_day_of_month ?? bw_reset_day_of_month
   );
+
+  if (today.getDate() >= (data?.bw_reset_day_of_month ?? bw_reset_day_of_month)) {
+    nextResetDay.setMonth(nextResetDay.getMonth() + 1);
+  }
 
   return (
     <div className="mb-32 text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left">
