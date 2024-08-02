@@ -117,6 +117,11 @@ export default async function handler(req: NextRequest) {
           })
           .map((proxy) => proxy.name!),
       },
+      {
+        name: "Select",
+        type: "select",
+        proxies: yamlJson.proxies.map((proxy) => proxy.name!),
+      },
     ];
 
     const newYamlContent = yaml.dump(yamlJson);
