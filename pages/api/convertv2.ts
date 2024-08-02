@@ -22,6 +22,11 @@ export type ClashConfig = {
   rules: string[];
 };
 
+type IpApiResponse = {
+  countryCode: string;
+  city: string;
+};
+
 const seanSubUrl =
   "https://jmssub.net/members/getsub.php?service=1005699&id=60886f48-f5d7-4787-87af-5f172b056cfe";
 const cabbageSubUrl =
@@ -56,7 +61,7 @@ export default async function handler(req: NextRequest) {
     const proxies = await JustSockSubJson.map(async (proxy, index) => {
       const { countryCode, city } = await fetch(
         `http://ip-api.com/json/${proxy.server}`
-      ).then((res) => res.json());
+      ).then((res) => res.json() as Promise<IpApiResponse>);
 
       // "JMS-1005699@c11s1.portablesubmarines.com:9358" get c11s1
       const serverName = proxy.name?.split("@")[1].split(".")[0];
@@ -149,3 +154,23 @@ export default async function handler(req: NextRequest) {
       - JMS-1005699@c11s5.portablesubmarines.com:9358
       - JMS-1005699@c11s801.portablesubmarines.com:9358
  */
+
+/**
+  * {
+  "query": "206.190.233.163",
+  "status": "success",
+  "country": "Japan",
+  "countryCode": "JP",
+  "region": "27",
+  "regionName": "Osaka",
+  "city": "Osaka",
+  "zip": "543-0062",
+  "lat": 34.6946,
+  "lon": 135.5021,
+  "timezone": "Asia/Tokyo",
+  "isp": "DOT COM SOLUTIONS",
+  "org": "Micro Dynamic Solutions, Inc.",
+  "as": "AS25820 IT7 Networks Inc"
+}
+  * 
+  *  */
