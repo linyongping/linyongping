@@ -98,16 +98,27 @@ export default async function handler(req: NextRequest) {
     });
 
     yamlJson.proxies = await Promise.all(proxies);
+    const allProxyNames = yamlJson.proxies.map((proxy) => proxy.name!);
     yamlJson["proxy-groups"] = [
       {
-        name: "AUTO-SELECT-PROXY",
+        name: "Proxy",
+        type: "select",
+        proxies: [
+          "Auto-Select",
+          "US-only-auto-select",
+          "Manual-Select",
+          ...allProxyNames,
+        ],
+      },
+      {
+        name: "Auto-Select",
         type: "url-test",
         url: "http://www.gstatic.com/generate_204",
         interval: 1000 * 60 * 5,
         proxies: yamlJson.proxies.map((proxy) => proxy.name!),
       },
       {
-        name: "USA-PROXY",
+        name: "US-only-auto-select",
         type: "url-test",
         url: "http://www.gstatic.com/generate_204",
         interval: 1000 * 60 * 5,
@@ -118,7 +129,7 @@ export default async function handler(req: NextRequest) {
           .map((proxy) => proxy.name!),
       },
       {
-        name: "Select",
+        name: "Manual-Select",
         type: "select",
         proxies: yamlJson.proxies.map((proxy) => proxy.name!),
       },
