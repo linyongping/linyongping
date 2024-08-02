@@ -11,23 +11,13 @@ type ClashConfig = {
   mode: "Rule";
   "log-level": "info";
   "external-controller": string;
-  proxies: {
-    name: string;
-    server?: string;
-    port: number;
-    type: "ss" | "vmess";
-    cipher?: string;
-    password?: string;
-    uuid?: string;
-    alterId?: number;
-    tls?: boolean;
-    "skip-cert-verify"?: boolean;
-    udp: boolean;
-  }[];
+  proxies: (VmessConfig | SsConfig)[];
   "proxy-groups": {
     name: string;
     type: "select" | "url-test";
     proxies: string[];
+    url?: string;
+    interval?: number;
   }[];
   rules: string[];
 };
@@ -63,49 +53,66 @@ export default async function handler(req: NextRequest) {
     const yamlConfigText = await yamlConfigRes.text();
     let yamlJson = yaml.load(yamlConfigText) as ClashConfig;
 
-    yamlJson.proxies = yamlJson.proxies.map((proxy) => {
-      if (proxy.type === "vmess") {
-        const matchedConfig = JustSockSubJson.find((config) => {
-          return (config as VmessConfig).ps === proxy.name;
-        }); // find matched config
+    const proxies = await JustSockSubJson.map(async (proxy, index) => {
+      const { countryCode, city } = await fetch(
+        `http://ip-api.com/json/${proxy.server}`
+      ).then((res) => res.json());
 
-        if (matchedConfig && matchedConfig.serverType === "vmess") {
-          // remove serverType from matchedConfig
-          return {
-            name: proxy.name,
-            server: matchedConfig.add,
-            port: parseInt(matchedConfig.port),
-            type: "vmess",
-            uuid: matchedConfig.id,
-            alterId: parseInt(matchedConfig.aid),
-            cipher: "auto",
-            tls: false,
-            "skip-cert-verify": true,
-            udp: true,
-          };
-        }
+      // "JMS-1005699@c11s1.portablesubmarines.com:9358" get c11s1
+      const serverName = proxy.name?.split("@")[1].split(".")[0];
+      const name = `${serverName}-[${countryCode}/${city}]`;
+
+      if (proxy.type === "vmess") {
+        // remove serverType from matchedConfig
+        return {
+          type: "vmess" as const,
+          name,
+          server: proxy.server,
+          port: proxy.port,
+          uuid: proxy.uuid,
+          alterId: proxy.alterId,
+          cipher: "auto",
+          tls: false,
+          "skip-cert-verify": true,
+          udp: true,
+        };
       }
 
       if (proxy.type === "ss") {
-        const matchedConfig = JustSockSubJson.find((config) => {
-          return (config as SsConfig).name === proxy.name;
-        });
-
-        if (matchedConfig && matchedConfig.serverType === "ss") {
-          console.log("matchedConfig", matchedConfig);
-          return {
-            name: proxy.name,
-            server: matchedConfig.server,
-            port: parseInt(matchedConfig.port ?? ""),
-            type: "ss",
-            cipher: matchedConfig.cipher,
-            password: matchedConfig.password,
-            udp: true,
-          };
-        }
+        return {
+          name,
+          server: proxy.server,
+          port: proxy.port,
+          type: "ss" as const,
+          cipher: proxy.cipher,
+          password: proxy.password,
+          udp: true,
+        };
       }
       return proxy;
     });
+
+    yamlJson.proxies = await Promise.all(proxies);
+    yamlJson["proxy-groups"] = [
+      {
+        name: "AUTO-SELECT-PROXY",
+        type: "url-test",
+        url: "http://www.gstatic.com/generate_204",
+        interval: 1000 * 60 * 5,
+        proxies: yamlJson.proxies.map((proxy) => proxy.name!),
+      },
+      {
+        name: "USA-PROXY",
+        type: "url-test",
+        url: "http://www.gstatic.com/generate_204",
+        interval: 1000 * 60 * 5,
+        proxies: yamlJson.proxies
+          .filter((proxy) => {
+            return proxy.name?.includes("US");
+          })
+          .map((proxy) => proxy.name!),
+      },
+    ];
 
     const newYamlContent = yaml.dump(yamlJson);
 
@@ -126,3 +133,19 @@ export default async function handler(req: NextRequest) {
     return new NextResponse("Error fetching data", { status: 500 });
   }
 }
+
+/**
+ * 
+ * proxy-groups:
+  - name: AUTO-SELECT-PROXY
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    proxies:
+      - JMS-1005699@c11s1.portablesubmarines.com:9358
+      - JMS-1005699@c11s2.portablesubmarines.com:9358
+      - JMS-1005699@c11s3.portablesubmarines.com:9358
+      - JMS-1005699@c11s4.portablesubmarines.com:9358
+      - JMS-1005699@c11s5.portablesubmarines.com:9358
+      - JMS-1005699@c11s801.portablesubmarines.com:9358
+ */

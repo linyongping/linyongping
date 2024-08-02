@@ -2,18 +2,16 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { decode } from "base-64";
 export interface VmessConfig {
-  v: string;
-  ps: string;
-  add: string;
+  name: string;
+  server: string;
   port: string;
-  id: string;
-  aid: string;
-  net: string;
-  type: string;
-  host: string;
-  path: string;
-  tls: string;
-  serverType: "vmess";
+  uuid: string;
+  alterId: string;
+  tls?: boolean;
+  cipher?: string;
+  "skip-cert-verify"?: boolean;
+  udp?: boolean;
+  type: "vmess";
 }
 
 export interface SsConfig {
@@ -21,7 +19,7 @@ export interface SsConfig {
   password?: string;
   server?: string;
   port?: string;
-  serverType: "ss";
+  type: "ss";
   name?: string;
 }
 
@@ -47,7 +45,7 @@ export function convertSubStringToJson(
           const [password, server] = passwordAndServer.split("@");
 
           return {
-            serverType: "ss",
+            type: "ss",
             cipher,
             password,
             server,
@@ -57,10 +55,14 @@ export function convertSubStringToJson(
         }
 
         const decoded = decode(encoded.replace("vmess://", ""));
-        const vmessConfig = JSON.parse(decoded) as VmessConfig;
+        const vmessConfig = JSON.parse(decoded);
         return {
-          ...vmessConfig,
-          serverType: "vmess",
+          server: vmessConfig.add,
+          port: vmessConfig.port,
+          uuid: vmessConfig.id,
+          alterId: vmessConfig.aid,
+          name: vmessConfig.ps,
+          type: "vmess",
         };
       }
     );
