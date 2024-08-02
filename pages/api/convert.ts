@@ -1,36 +1,9 @@
 import { convertSubStringToJson, SsConfig, VmessConfig } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import yaml from "js-yaml";
+import { ClashConfig } from "./convertv2";
 
 export const runtime = "edge";
-
-type ClashConfig = {
-  port: number;
-  "socks-port": number;
-  "allow-lan": boolean;
-  mode: "Rule";
-  "log-level": "info";
-  "external-controller": string;
-  proxies: {
-    name: string;
-    server?: string;
-    port: number;
-    type: "ss" | "vmess";
-    cipher?: string;
-    password?: string;
-    uuid?: string;
-    alterId?: number;
-    tls?: boolean;
-    "skip-cert-verify"?: boolean;
-    udp: boolean;
-  }[];
-  "proxy-groups": {
-    name: string;
-    type: "select" | "url-test";
-    proxies: string[];
-  }[];
-  rules: string[];
-};
 
 const seanSubUrl =
   "https://jmssub.net/members/getsub.php?service=1005699&id=60886f48-f5d7-4787-87af-5f172b056cfe";
@@ -63,18 +36,18 @@ export default async function handler(req: NextRequest) {
     yamlJson.proxies = yamlJson.proxies.map((proxy) => {
       if (proxy.type === "vmess") {
         const matchedConfig = subJson.find((config) => {
-          return (config as VmessConfig).ps === proxy.name;
+          return (config as VmessConfig).name === proxy.name;
         }); // find matched config
 
-        if (matchedConfig && matchedConfig.serverType === "vmess") {
+        if (matchedConfig && matchedConfig.type === "vmess") {
           // remove serverType from matchedConfig
           return {
             name: proxy.name,
-            server: matchedConfig.add,
-            port: parseInt(matchedConfig.port),
-            type: "vmess",
-            uuid: matchedConfig.id,
-            alterId: parseInt(matchedConfig.aid),
+            server: matchedConfig.server,
+            port: matchedConfig.port,
+            type: "vmess" as const,
+            uuid: matchedConfig.uuid,
+            alterId: matchedConfig.alterId,
             cipher: "auto",
             tls: false,
             "skip-cert-verify": true,
@@ -88,13 +61,13 @@ export default async function handler(req: NextRequest) {
           return (config as SsConfig).name === proxy.name;
         });
 
-        if (matchedConfig && matchedConfig.serverType === "ss") {
+        if (matchedConfig && matchedConfig.type === "ss") {
           console.log("matchedConfig", matchedConfig);
           return {
             name: proxy.name,
             server: matchedConfig.server,
-            port: parseInt(matchedConfig.port ?? ""),
-            type: "ss",
+            port: matchedConfig.port ?? "",
+            type: "ss" as const,
             cipher: matchedConfig.cipher,
             password: matchedConfig.password,
             udp: true,

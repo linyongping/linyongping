@@ -4,7 +4,7 @@ import yaml from "js-yaml";
 
 export const runtime = "edge";
 
-type ClashConfig = {
+export type ClashConfig = {
   port: number;
   "socks-port": number;
   "allow-lan": boolean;
