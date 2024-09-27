@@ -6,7 +6,7 @@ import { ClashConfig } from "./convertv2";
 export const runtime = "edge";
 
 const seanSubUrl =
-  "https://jmssub.net/members/getsub.php?service=1005699&id=60886f48-f5d7-4787-87af-5f172b056cfe";
+  "https://jmssub.net/members/getsub.php?service=1005699&id=60886f48-f5d7-4787-87af-5f172b056cfe&usedomains=1";
 const cabbageSubUrl =
   "https://jmssub.net/members/getsub.php?service=1034881&id=be6eee5e-4512-4a89-8563-cae37a3be8a8";
 
@@ -15,14 +15,16 @@ export default async function handler(req: NextRequest) {
   const { searchParams } = url;
   const secret = searchParams.get("secret");
   const subType = searchParams.get("subType");
+  const useDomain = searchParams.get("usedomains") === "1";
   if (secret !== "kfcv50") {
     return new NextResponse("Invalid secret", { status: 401 });
   }
 
   const subUrl = subType === "xbc" ? cabbageSubUrl : seanSubUrl;
+  const finalUrl = useDomain ? subUrl + "&usedomains=1" : subUrl;
 
   try {
-    const justVmessRes = await fetch(subUrl);
+    const justVmessRes = await fetch(finalUrl);
     const vmessSub = await justVmessRes.text();
     const subJson = convertSubStringToJson(vmessSub);
 
